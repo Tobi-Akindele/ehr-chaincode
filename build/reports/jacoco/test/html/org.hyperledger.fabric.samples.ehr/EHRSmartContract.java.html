@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EHRSmartContract.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ehr</a> &gt; <a href="index.source.html" class="el_package">org.hyperledger.fabric.samples.ehr</a> &gt; <span class="el_source">EHRSmartContract.java</span></div><h1>EHRSmartContract.java</h1><pre class="source lang-java linenums">/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package org.hyperledger.fabric.samples.ehr;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+import com.owlike.genson.GenericType;
+import org.hyperledger.fabric.Logger;
+import org.hyperledger.fabric.contract.Context;
+import org.hyperledger.fabric.contract.ContractInterface;
+import org.hyperledger.fabric.contract.annotation.Contact;
+import org.hyperledger.fabric.contract.annotation.Contract;
+import org.hyperledger.fabric.contract.annotation.Default;
+import org.hyperledger.fabric.contract.annotation.Info;
+import org.hyperledger.fabric.contract.annotation.License;
+import org.hyperledger.fabric.contract.annotation.Transaction;
+import org.hyperledger.fabric.samples.ehr.enums.Errors;
+import org.hyperledger.fabric.shim.ChaincodeException;
+import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
+
+import com.owlike.genson.Genson;
+
+@Contract(
+        name = &quot;ehr&quot;,
+        info = @Info(
+                title = &quot;EHR Smart Contract&quot;,
+                description = &quot;EHR smart contract definition&quot;,
+                version = &quot;0.0.1-SNAPSHOT&quot;,
+                license = @License(
+                        name = &quot;Apache 2.0 License&quot;,
+                        url = &quot;http://www.apache.org/licenses/LICENSE-2.0.html&quot;),
+                contact = @Contact(
+                        email = &quot;tobi.dev@sharklasers.com&quot;,
+                        name = &quot;Tobi A.&quot;,
+                        url = &quot;https://hyperledger.example.com&quot;)))
+@Default
+<span class="fc" id="L43">public final class EHRSmartContract implements ContractInterface {</span>
+
+<span class="fc" id="L45">    public static final Logger LOG = Logger.getLogger(EHRSmartContract.class);</span>
+
+<span class="fc" id="L47">    private final Genson genson = new Genson();</span>
+
+    /**
+     * Creates initial EHR data on the ledger.
+     *
+     * @param ctx the transaction context
+     */
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public void InitLedger(final Context ctx) {
+<span class="nc" id="L56">        ChaincodeStub stub = ctx.getStub();</span>
+
+<span class="nc" id="L58">        String payload = genson.serialize(List.of(new EHRData(</span>
+                &quot;2bb3260-e24-f036-8c-360da8156&quot;,
+                &quot;Sample Text Data&quot;,
+                &quot;Annette KOEPP&quot;,
+                &quot;100 kB&quot;,
+                false,
+                &quot;&quot;,
+                &quot;&quot;,
+                &quot;&quot;
+        )));
+
+<span class="nc" id="L69">        CreateEHRData(ctx, payload);</span>
+
+<span class="nc" id="L71">    }</span>
+
+    /**
+     * Creates a new EHR data on the ledger.
+     *
+     * @param ctx the transaction context
+     * @param payload the stringified list of the new EHR data
+     * @return the payload
+     */
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public String CreateEHRData(final Context ctx, final String payload) {
+<span class="fc" id="L82">        ChaincodeStub stub = ctx.getStub();</span>
+
+<span class="fc" id="L84">        LOG.info(String.format(&quot;[+] Payload: %s&quot;, payload));</span>
+
+<span class="fc" id="L86">        List&lt;EHRData&gt; ehrDataList = genson.deserialize(payload, new GenericType&lt;List&lt;EHRData&gt;&gt;() {</span>
+        });
+
+<span class="fc" id="L89">        ehrDataList.stream().forEach(ehrData -&gt; {</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">            if (!EHRDataExists(ctx, ehrData.getId())) {</span>
+<span class="fc" id="L91">                String sortedJSON = genson.serialize(ehrData);</span>
+<span class="fc" id="L92">                LOG.info(String.format(&quot;[+] GENSON: %s&quot;, sortedJSON));</span>
+<span class="fc" id="L93">                stub.putStringState(ehrData.getId(), sortedJSON);</span>
+            }
+<span class="fc" id="L95">        });</span>
+
+<span class="fc" id="L97">        return payload;</span>
+    }
+
+    /**
+     * Retrieves an EHR data with the specified ID from the ledger.
+     *
+     * @param ctx the transaction context
+     * @param ehrDataId the ID of the EHR data
+     * @return the EHR data found on the ledger if there was one
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public EHRData ReadEHRData(final Context ctx, final String ehrDataId) {
+<span class="fc" id="L109">        ChaincodeStub stub = ctx.getStub();</span>
+<span class="fc" id="L110">        String ehrDataJSON = stub.getStringState(ehrDataId);</span>
+
+<span class="pc bpc" id="L112" title="1 of 4 branches missed.">        if (ehrDataJSON == null || ehrDataJSON.isEmpty()) {</span>
+<span class="fc" id="L113">            String errorMessage = String.format(&quot;EHRData %s does not exist&quot;, ehrDataId);</span>
+<span class="fc" id="L114">            throw new ChaincodeException(errorMessage, Errors.EHRData_NOT_FOUND.toString());</span>
+        }
+
+<span class="fc" id="L117">        EHRData ehrData = genson.deserialize(ehrDataJSON, EHRData.class);</span>
+<span class="fc" id="L118">        return ehrData;</span>
+    }
+
+    /**
+     * Checks the existence of the EHR data on the ledger
+     *
+     * @param ctx the transaction context
+     * @param ehrDataId the ID of the EHR data
+     * @return boolean indicating the existence of the EHR data
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public boolean EHRDataExists(final Context ctx, final String ehrDataId) {
+<span class="fc" id="L130">        ChaincodeStub stub = ctx.getStub();</span>
+<span class="fc" id="L131">        String ehrJSON = stub.getStringState(ehrDataId);</span>
+
+<span class="pc bpc" id="L133" title="2 of 4 branches missed.">        return (ehrJSON != null &amp;&amp; !ehrJSON.isEmpty());</span>
+    }
+
+    /**
+     * Retrieves all EHR data from the ledger.
+     *
+     * @param ctx the transaction context
+     * @return array of EHR data found on the ledger
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String GetAllEHRData(final Context ctx) {
+<span class="fc" id="L144">        ChaincodeStub stub = ctx.getStub();</span>
+
+<span class="fc" id="L146">        List&lt;EHRData&gt; queryResults = new ArrayList&lt;&gt;();</span>
+
+        // To retrieve all EHR data from the ledger use getStateByRange with empty startKey &amp; endKey.
+        // Giving empty startKey &amp; endKey is interpreted as all the keys from beginning to end.
+        // As another example, if you use startKey = 'asset0', endKey = 'asset9' ,
+        // then getStateByRange will retrieve asset with keys between asset0 (inclusive) and asset9 (exclusive) in lexical order.
+<span class="fc" id="L152">        QueryResultsIterator&lt;KeyValue&gt; results = stub.getStateByRange(&quot;&quot;, &quot;&quot;);</span>
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for (KeyValue result: results) {</span>
+<span class="fc" id="L155">            EHRData ehrData = genson.deserialize(result.getStringValue(), EHRData.class);</span>
+<span class="fc" id="L156">            queryResults.add(ehrData);</span>
+<span class="fc" id="L157">        }</span>
+
+<span class="fc" id="L159">        final String response = genson.serialize(queryResults);</span>
+
+<span class="fc" id="L161">        return response;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

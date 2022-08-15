@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.21">
+<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/test/java/org/hyperledger/fabric/samples/ehr/EHRSmartContractTest.java">
+</file>
+<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/test/java/org/hyperledger/fabric/samples/ehr/EHRTest.java">
+</file>
+<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/test/java/org/hyperledger/fabric/samples/ehr/MockEHRDataResultsIterator.java">
+</file>
+<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/test/java/org/hyperledger/fabric/samples/ehr/MockKeyValue.java">
+</file>
+</checkstyle>

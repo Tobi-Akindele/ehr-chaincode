@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EHRData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ehr</a> &gt; <a href="index.source.html" class="el_package">org.hyperledger.fabric.samples.ehr</a> &gt; <span class="el_source">EHRData.java</span></div><h1>EHRData.java</h1><pre class="source lang-java linenums">package org.hyperledger.fabric.samples.ehr;
+
+import com.owlike.genson.annotation.JsonProperty;
+import org.hyperledger.fabric.contract.annotation.DataType;
+import org.hyperledger.fabric.contract.annotation.Property;
+
+import java.util.Objects;
+
+@DataType()
+public final class EHRData {
+
+    @Property()
+    private final String id;
+
+    @Property()
+    private final String textData;
+
+    @Property()
+    private final String name;
+
+    @Property()
+    private final String size;
+
+    @Property()
+    private final boolean doc;
+
+    @Property()
+    private final String fileType;
+
+    @Property()
+    private final String fileName;
+
+    @Property()
+    private final String base64String;
+
+    public EHRData(
+            @JsonProperty(&quot;id&quot;) final String id,
+            @JsonProperty(&quot;textData&quot;) final String textData,
+            @JsonProperty(&quot;name&quot;) final String name,
+            @JsonProperty(&quot;size&quot;) final String size,
+            @JsonProperty(&quot;doc&quot;) final boolean doc,
+            @JsonProperty(&quot;fileType&quot;) final String fileType,
+            @JsonProperty(&quot;fileName&quot;) final String fileName,
+            @JsonProperty(&quot;base64String&quot;) final String base64String
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        this.id = id;</span>
+<span class="fc" id="L47">        this.textData = textData;</span>
+<span class="fc" id="L48">        this.name = name;</span>
+<span class="fc" id="L49">        this.size = size;</span>
+<span class="fc" id="L50">        this.doc = doc;</span>
+<span class="fc" id="L51">        this.fileType = fileType;</span>
+<span class="fc" id="L52">        this.fileName = fileName;</span>
+<span class="fc" id="L53">        this.base64String = base64String;</span>
+<span class="fc" id="L54">    }</span>
+
+    public String getId() {
+<span class="fc" id="L57">        return id;</span>
+    }
+
+    public String getTextData() {
+<span class="fc" id="L61">        return textData;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L65">        return name;</span>
+    }
+
+    public String getSize() {
+<span class="fc" id="L69">        return size;</span>
+    }
+
+    public boolean isDoc() {
+<span class="fc" id="L73">        return doc;</span>
+    }
+
+    public String getFileType() {
+<span class="fc" id="L77">        return fileType;</span>
+    }
+
+    public String getFileName() {
+<span class="fc" id="L81">        return fileName;</span>
+    }
+
+    public String getBase64String() {
+<span class="fc" id="L85">        return base64String;</span>
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L91">            return true;</span>
+        }
+<span class="fc bfc" id="L93" title="All 4 branches covered.">        if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L94">            return false;</span>
+        }
+
+<span class="fc" id="L97">        EHRData other = (EHRData) obj;</span>
+
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        return Objects.deepEquals(</span>
+                new String[]{
+<span class="fc" id="L101">                        getId(),</span>
+<span class="fc" id="L102">                        getTextData(),</span>
+<span class="fc" id="L103">                        getName(),</span>
+<span class="fc" id="L104">                        getSize(),</span>
+<span class="fc" id="L105">                        getFileType(),</span>
+<span class="fc" id="L106">                        getFileName(),</span>
+<span class="fc" id="L107">                        getBase64String()</span>
+                },
+                new String[]{
+<span class="fc" id="L110">                        other.getId(),</span>
+<span class="fc" id="L111">                        other.getTextData(),</span>
+<span class="fc" id="L112">                        other.getName(),</span>
+<span class="fc" id="L113">                        other.getSize(),</span>
+<span class="fc" id="L114">                        other.getFileType(),</span>
+<span class="fc" id="L115">                        other.getFileName(),</span>
+<span class="fc" id="L116">                        other.getBase64String()</span>
+                }
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        ) &amp;&amp; Objects.deepEquals(</span>
+                new boolean[]{
+<span class="fc" id="L120">                        isDoc()</span>
+                },
+                new boolean[]{
+<span class="fc" id="L123">                        other.isDoc()</span>
+                }
+        );
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L130">        return Objects.hash(</span>
+<span class="fc" id="L131">                getId(),</span>
+<span class="fc" id="L132">                getTextData(),</span>
+<span class="fc" id="L133">                getName(),</span>
+<span class="fc" id="L134">                getSize(),</span>
+<span class="fc" id="L135">                isDoc(),</span>
+<span class="fc" id="L136">                getFileType(),</span>
+<span class="fc" id="L137">                getFileName(),</span>
+<span class="fc" id="L138">                getBase64String()</span>
+        );
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L144">        return this.getClass().getSimpleName() + &quot;@&quot; + Integer.toHexString(hashCode()) + &quot;[&quot;</span>
+                + &quot;id=&quot; + id + &quot;,&quot;
+                + &quot; textData=&quot; + textData + &quot;,&quot;
+                + &quot; name=&quot; + name + &quot;,&quot;
+                + &quot; size=&quot; + size + &quot;,&quot;
+                + &quot; doc=&quot; + doc + &quot;,&quot;
+                + &quot; fileType=&quot; + fileType + &quot;,&quot;
+                + &quot; fileName=&quot; + fileName + &quot;,&quot;
+                + &quot; base64String=&quot; + base64String + &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

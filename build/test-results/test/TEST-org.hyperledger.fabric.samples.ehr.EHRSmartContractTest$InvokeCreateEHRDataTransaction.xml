@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.hyperledger.fabric.samples.ehr.EHRSmartContractTest$InvokeCreateEHRDataTransaction" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-08-15T17:06:12" hostname="Oyindamolas-MacBook-Pro.local" time="0.041">
+  <properties/>
+  <testcase name="whenEHRDataDoesNotExist()" classname="org.hyperledger.fabric.samples.ehr.EHRSmartContractTest$InvokeCreateEHRDataTransaction" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Aug 15, 2022 6:06:12 PM org.hyperledger.fabric.samples.ehr.EHRSmartContract CreateEHRData
+INFO: [+] Payload: [ {
+  "textData" : "Sample Text Data",
+  "fileName" : "",
+  "size" : "100 kB",
+  "base64String" : "",
+  "name" : "Annette KOEPP",
+  "doc" : false,
+  "id" : "2bb3260-e24-f036-8c-360da8156",
+  "fileType" : ""
+} ]
+Aug 15, 2022 6:06:12 PM org.hyperledger.fabric.samples.ehr.EHRSmartContract lambda$CreateEHRData$0
+INFO: [+] GENSON: {"base64String":"","doc":false,"fileName":"","fileType":"","id":"2bb3260-e24-f036-8c-360da8156","name":"Annette KOEPP","size":"100 kB","textData":"Sample Text Data"}
+]]></system-err>
+</testsuite>
