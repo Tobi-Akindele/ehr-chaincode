@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<checkstyle version="8.21">
-<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/main/java/org/hyperledger/fabric/samples/ehr/EHRData.java">
-</file>
-<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/main/java/org/hyperledger/fabric/samples/ehr/EHRSmartContract.java">
-</file>
-<file name="/Users/oyindamolaakindele/HyperledgerFabric/fabric-samples/asset-transfer-basic/ehr-chaincode-java/src/main/java/org/hyperledger/fabric/samples/ehr/enums/Errors.java">
-</file>
-</checkstyle>
