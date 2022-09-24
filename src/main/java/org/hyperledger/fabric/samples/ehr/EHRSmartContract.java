@@ -5,6 +5,7 @@
 package org.hyperledger.fabric.samples.ehr;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hyperledger.fabric.Logger;
@@ -63,7 +64,8 @@ public final class EHRSmartContract implements ContractInterface {
                 false,
                 "",
                 "",
-                ""
+                "",
+                null
         ));
 
         CreateEHRData(ctx, payload);
@@ -81,14 +83,23 @@ public final class EHRSmartContract implements ContractInterface {
     public String CreateEHRData(final Context ctx, final String payload) {
         ChaincodeStub stub = ctx.getStub();
 
-        EHRData ehrData = genson.deserialize(payload, EHRData.class);
+        EHRData payloadObject = genson.deserialize(payload, EHRData.class);
 
-        if (EHRDataExists(ctx, ehrData.getId())) {
-            String errorMessage = String.format("EHR Data %s already exists", ehrData.getId());
+        if (EHRDataExists(ctx, payloadObject.getId())) {
+            String errorMessage = String.format("EHR Data %s already exists", payloadObject.getId());
             LOGGER.error(errorMessage);
             throw new ChaincodeException(errorMessage, Errors.EHR_ALREADY_EXISTS.toString());
         }
-
+        EHRData ehrData = new EHRData(
+                payloadObject.getId(),
+                payloadObject.getTextData(),
+                payloadObject.getName(),
+                payloadObject.getSize(),
+                payloadObject.isDoc(),
+                payloadObject.getFileType(),
+                payloadObject.getFileName(),
+                payloadObject.getBase64String(),
+                new Date());
         String sortedJSON = genson.serialize(ehrData);
         stub.putStringState(ehrData.getId(), sortedJSON);
 
@@ -168,27 +179,27 @@ public final class EHRSmartContract implements ContractInterface {
      * @return array of EHR data found on the ledger
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String GetPaginatedEHRData(final Context ctx, final String bookmark, final String pageSize) {
+    public String GetPaginatedEHRData(final Context ctx, final String query,
+                                      final String pageSize, final String bookmark) {
         ChaincodeStub stub = ctx.getStub();
 
         List<EHRData> queryResults = new ArrayList<>();
+        final String previousBookMark = bookmark;
         String resultBookMark = "";
-        Integer totalResult = 0;
 
         QueryResultsIteratorWithMetadata<KeyValue> results = stub
-                .getStateByRangeWithPagination("", "", Integer.parseInt(pageSize), bookmark);
+                .getQueryResultWithPagination(query, Integer.parseInt(pageSize), bookmark);
         if (results != null) {
             ChaincodeShim.QueryResponseMetadata metadata = results.getMetadata();
-            for (KeyValue result: results) {
+            for (KeyValue result : results) {
                 EHRData ehrData = genson.deserialize(result.getStringValue(), EHRData.class);
                 queryResults.add(ehrData);
             }
             resultBookMark = metadata.getBookmark();
-            totalResult = metadata.getFetchedRecordsCount();
         }
 
         final String response = genson.serialize(
-                new PageResult(queryResults, resultBookMark, pageSize, totalResult));
+                new PageResult(queryResults, previousBookMark, resultBookMark));
 
         return response;
     }
