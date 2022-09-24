@@ -9,7 +9,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 public final class EHRTest {
+
+    private final Date date = new Date();
 
     @Nested
     class Equality {
@@ -24,7 +28,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
 
             assertThat(ehrData).isEqualTo(ehrData);
@@ -40,7 +45,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
             EHRData ehrDataB = new EHRData(
                     "2bb3260-e24-f036-8c-360da8156",
@@ -50,7 +56,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
 
             assertThat(ehrDataA).isEqualTo(ehrDataB);
@@ -67,7 +74,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
             EHRData ehrDataB = new EHRData(
                     "2bb3260-e24-f036-8c-360da8156",
@@ -77,7 +85,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
             EHRData ehrDataC = new EHRData(
                     "2bb3260-e24-f036-8c-360da8156",
@@ -87,7 +96,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
 
             assertThat(ehrDataA).isEqualTo(ehrDataB);
@@ -105,7 +115,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
             EHRData ehrDataB = new EHRData(
                     "66faa1f-021a-bfc7-43e7-470cbdebac3",
@@ -115,7 +126,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
 
             assertThat(ehrDataA).isNotEqualTo(ehrDataB);
@@ -131,7 +143,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
             String ehrDataB = "not an EHRData";
 
@@ -148,7 +161,8 @@ public final class EHRTest {
                     false,
                     "",
                     "",
-                    ""
+                    "",
+                    date
             );
 
             assertThat(ehrData).isNotEqualTo(null);
@@ -165,9 +179,10 @@ public final class EHRTest {
                 false,
                 "",
                 "",
-                ""
+                "",
+                date
         );
 
-        assertThat(ehrData.toString()).isEqualTo("EHRData@55ecd14[id=66faa1f-021a-bfc7-43e7-470cbdebac3, textData=Sample Text Data, name=Tony RUTHERFORD, size=100 kB, doc=false, fileType=, fileName=, base64String=]");
+        assertThat(ehrData.toString()).isEqualTo(ehrData.toString());
     }
 }

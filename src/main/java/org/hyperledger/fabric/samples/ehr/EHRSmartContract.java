@@ -5,10 +5,9 @@
 package org.hyperledger.fabric.samples.ehr;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-
-import com.owlike.genson.GenericType;
 import org.hyperledger.fabric.Logger;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
@@ -18,13 +17,16 @@ import org.hyperledger.fabric.contract.annotation.Default;
 import org.hyperledger.fabric.contract.annotation.Info;
 import org.hyperledger.fabric.contract.annotation.License;
 import org.hyperledger.fabric.contract.annotation.Transaction;
+import org.hyperledger.fabric.protos.peer.ChaincodeShim;
 import org.hyperledger.fabric.samples.ehr.enums.Errors;
+import org.hyperledger.fabric.samples.ehr.utils.PageResult;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
 import com.owlike.genson.Genson;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
 
 @Contract(
         name = "ehr",
@@ -34,7 +36,7 @@ import com.owlike.genson.Genson;
                 version = "0.0.1-SNAPSHOT",
                 license = @License(
                         name = "Apache 2.0 License",
-                        url = "http://www.apache.org/licenses/LICENSE-2.0.html"),
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.html"),
                 contact = @Contact(
                         email = "tobi.dev@sharklasers.com",
                         name = "Tobi A.",
@@ -42,7 +44,7 @@ import com.owlike.genson.Genson;
 @Default
 public final class EHRSmartContract implements ContractInterface {
 
-    public static final Logger LOG = Logger.getLogger(EHRSmartContract.class);
+    public static final Logger LOGGER = Logger.getLogger(EHRSmartContract.class);
 
     private final Genson genson = new Genson();
 
@@ -53,9 +55,8 @@ public final class EHRSmartContract implements ContractInterface {
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void InitLedger(final Context ctx) {
-        ChaincodeStub stub = ctx.getStub();
 
-        String payload = genson.serialize(List.of(new EHRData(
+        String payload = genson.serialize(new EHRData(
                 "2bb3260-e24-f036-8c-360da8156",
                 "Sample Text Data",
                 "Annette KOEPP",
@@ -63,8 +64,9 @@ public final class EHRSmartContract implements ContractInterface {
                 false,
                 "",
                 "",
-                ""
-        )));
+                "",
+                null
+        ));
 
         CreateEHRData(ctx, payload);
 
@@ -81,18 +83,25 @@ public final class EHRSmartContract implements ContractInterface {
     public String CreateEHRData(final Context ctx, final String payload) {
         ChaincodeStub stub = ctx.getStub();
 
-        LOG.info(String.format("[+] Payload: %s", payload));
+        EHRData payloadObject = genson.deserialize(payload, EHRData.class);
 
-        List<EHRData> ehrDataList = genson.deserialize(payload, new GenericType<List<EHRData>>() {
-        });
-
-        ehrDataList.stream().forEach(ehrData -> {
-            if (!EHRDataExists(ctx, ehrData.getId())) {
-                String sortedJSON = genson.serialize(ehrData);
-                LOG.info(String.format("[+] GENSON: %s", sortedJSON));
-                stub.putStringState(ehrData.getId(), sortedJSON);
-            }
-        });
+        if (EHRDataExists(ctx, payloadObject.getId())) {
+            String errorMessage = String.format("EHR Data %s already exists", payloadObject.getId());
+            LOGGER.error(errorMessage);
+            throw new ChaincodeException(errorMessage, Errors.EHR_ALREADY_EXISTS.toString());
+        }
+        EHRData ehrData = new EHRData(
+                payloadObject.getId(),
+                payloadObject.getTextData(),
+                payloadObject.getName(),
+                payloadObject.getSize(),
+                payloadObject.isDoc(),
+                payloadObject.getFileType(),
+                payloadObject.getFileName(),
+                payloadObject.getBase64String(),
+                new Date());
+        String sortedJSON = genson.serialize(ehrData);
+        stub.putStringState(ehrData.getId(), sortedJSON);
 
         return payload;
     }
@@ -111,6 +120,7 @@ public final class EHRSmartContract implements ContractInterface {
 
         if (ehrDataJSON == null || ehrDataJSON.isEmpty()) {
             String errorMessage = String.format("EHRData %s does not exist", ehrDataId);
+            LOGGER.error(errorMessage);
             throw new ChaincodeException(errorMessage, Errors.EHRData_NOT_FOUND.toString());
         }
 
@@ -150,13 +160,46 @@ public final class EHRSmartContract implements ContractInterface {
         // As another example, if you use startKey = 'asset0', endKey = 'asset9' ,
         // then getStateByRange will retrieve asset with keys between asset0 (inclusive) and asset9 (exclusive) in lexical order.
         QueryResultsIterator<KeyValue> results = stub.getStateByRange("", "");
-
         for (KeyValue result: results) {
             EHRData ehrData = genson.deserialize(result.getStringValue(), EHRData.class);
             queryResults.add(ehrData);
         }
 
         final String response = genson.serialize(queryResults);
+
+        return response;
+    }
+
+    /**
+     * Retrieves all EHR data from the ledger.
+     *
+     * @param ctx the transaction context
+     * @param bookmark the page number
+     * @param pageSize the page size
+     * @return array of EHR data found on the ledger
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String GetPaginatedEHRData(final Context ctx, final String query,
+                                      final String pageSize, final String bookmark) {
+        ChaincodeStub stub = ctx.getStub();
+
+        List<EHRData> queryResults = new ArrayList<>();
+        final String previousBookMark = bookmark;
+        String resultBookMark = "";
+
+        QueryResultsIteratorWithMetadata<KeyValue> results = stub
+                .getQueryResultWithPagination(query, Integer.parseInt(pageSize), bookmark);
+        if (results != null) {
+            ChaincodeShim.QueryResponseMetadata metadata = results.getMetadata();
+            for (KeyValue result : results) {
+                EHRData ehrData = genson.deserialize(result.getStringValue(), EHRData.class);
+                queryResults.add(ehrData);
+            }
+            resultBookMark = metadata.getBookmark();
+        }
+
+        final String response = genson.serialize(
+                new PageResult(queryResults, previousBookMark, resultBookMark));
 
         return response;
     }

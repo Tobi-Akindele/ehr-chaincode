@@ -4,6 +4,7 @@ import com.owlike.genson.annotation.JsonProperty;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
+import java.util.Date;
 import java.util.Objects;
 
 @DataType()
@@ -33,6 +34,9 @@ public final class EHRData {
     @Property()
     private final String base64String;
 
+    @Property()
+    private final Date createdAt;
+
     public EHRData(
             @JsonProperty("id") final String id,
             @JsonProperty("textData") final String textData,
@@ -41,7 +45,8 @@ public final class EHRData {
             @JsonProperty("doc") final boolean doc,
             @JsonProperty("fileType") final String fileType,
             @JsonProperty("fileName") final String fileName,
-            @JsonProperty("base64String") final String base64String
+            @JsonProperty("base64String") final String base64String,
+            @JsonProperty("createdAt") final Date createdAt
     ) {
         this.id = id;
         this.textData = textData;
@@ -51,6 +56,7 @@ public final class EHRData {
         this.fileType = fileType;
         this.fileName = fileName;
         this.base64String = base64String;
+        this.createdAt = createdAt;
     }
 
     public String getId() {
@@ -83,6 +89,10 @@ public final class EHRData {
 
     public String getBase64String() {
         return base64String;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     @Override
@@ -122,7 +132,14 @@ public final class EHRData {
                 new boolean[]{
                         other.isDoc()
                 }
-        );
+        ) && Objects.deepEquals(
+                new Date[] {
+                        getCreatedAt()
+                },
+                new Date[] {
+                        other.getCreatedAt()
+                }
+                );
     }
 
     @Override
@@ -135,7 +152,8 @@ public final class EHRData {
                 isDoc(),
                 getFileType(),
                 getFileName(),
-                getBase64String()
+                getBase64String(),
+                getCreatedAt()
         );
     }
 
@@ -149,6 +167,7 @@ public final class EHRData {
                 + " doc=" + doc + ","
                 + " fileType=" + fileType + ","
                 + " fileName=" + fileName + ","
-                + " base64String=" + base64String + "]";
+                + " base64String=" + base64String + "]"
+                + " createdAt=" + createdAt + "]";
     }
 }
